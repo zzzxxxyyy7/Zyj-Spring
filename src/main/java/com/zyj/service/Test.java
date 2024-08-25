@@ -7,8 +7,7 @@ public class Test {
     public static void main(String[] args) {
         ZyjSpringApplicationContext applicationContext = new ZyjSpringApplicationContext(AppConfig.class);
 
-        UserService userBean = (UserService) applicationContext.GetBean("userService");
-
-
+        UserInterfaces userService = (UserInterfaces) applicationContext.GetBean("userService");
+        userService.test();
     }
 }

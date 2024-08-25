@@ -1,4 +1,4 @@
-package com.zyj.spring;
+package com.zyj.spring.Annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Scope {
+@Target(ElementType.FIELD)
+public @interface Autowired {
 
-    String domain() default "Singleton";
+
 }

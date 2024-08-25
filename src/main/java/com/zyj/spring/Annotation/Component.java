@@ -1,4 +1,4 @@
-package com.zyj.spring;
+package com.zyj.spring.Annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,11 +7,11 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ComponentScan {
+public @interface Component {
 
     /**
-     * Bean 扫描路径
+     * Bean 名称
      * @return
      */
-    String classpath() default "";
+    String BeanName() default "";
 }

@@ -1,4 +1,4 @@
-package com.zyj.spring;
+package com.zyj.spring.Annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,11 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Component {
+public @interface Scope {
 
-    /**
-     * Bean 名称
-     * @return
-     */
-    String BeanName() default "";
+    String domain() default "Singleton";
 }
