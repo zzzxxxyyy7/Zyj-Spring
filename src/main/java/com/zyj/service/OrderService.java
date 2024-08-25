@@ -2,7 +2,7 @@ package com.zyj.service;
 
 import com.zyj.spring.Annotation.Component;
 
-@Component(BeanName = "orderService")
+@Component
 public class OrderService {
 
     public void test() {

@@ -1,19 +1,16 @@
 package com.zyj.spring;
 
 import com.zyj.BeanCreateException;
-import com.zyj.spring.Annotation.Autowired;
-import com.zyj.spring.Annotation.Component;
-import com.zyj.spring.Annotation.ComponentScan;
-import com.zyj.spring.Annotation.Scope;
+import com.zyj.spring.Annotation.*;
 import com.zyj.spring.Aware.BeanNameAware;
 import com.zyj.spring.Aware.BeanPostProcessor;
 import com.zyj.spring.Aware.InitializingBean;
-import com.zyj.spring.Factory.CglibProxyFactory;
 
 import java.beans.Introspector;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +42,7 @@ public class ZyjSpringApplicationContext {
         // 扫描
         // 如果配置类上存在这个注解
         if (AppConfig.isAnnotationPresent(ComponentScan.class)) {
+
             // 拿到注解
             ComponentScan componentScan = (ComponentScan) AppConfig.getAnnotation(ComponentScan.class);
 
@@ -60,10 +58,13 @@ public class ZyjSpringApplicationContext {
 
             if (file.isDirectory()) {
                 File[] files = file.listFiles();
+
                 if (files != null) {
                     for (File f : files) {
+
                         // 拿到文件的绝对路径
                         String fileName = f.getAbsolutePath();
+
                         // 判断是否是一个 Class 文件
                         if (fileName.endsWith(".class")) {
                             String className = fileName.substring(fileName.indexOf("com") , fileName.indexOf(".class"));
@@ -107,11 +108,9 @@ public class ZyjSpringApplicationContext {
                                 } catch (BeanCreateException e) {
                                     System.out.println("Bean 创建异常");
 
-                                } catch (InstantiationException e) {
+                                } catch (InstantiationException | IllegalAccessException e) {
                                     throw new RuntimeException(e);
 
-                                } catch (IllegalAccessException e) {
-                                    throw new RuntimeException(e);
                                 }
 
                             } catch (ClassNotFoundException e) {
@@ -131,10 +130,12 @@ public class ZyjSpringApplicationContext {
             BeanDefinition beanDefinition = Definition_Containers.get(beanName);
             if (beanDefinition.getScope().equals("Singleton")) {
                 Object bean = createBean(beanDefinition);
+                /**
+                 * 真正存入 IOC 容器的实际上是代理对象
+                 */
                 IOC_Containers.put(beanName , bean);
             }
         });
-
     }
 
     /**
@@ -150,12 +151,20 @@ public class ZyjSpringApplicationContext {
             Object bean = clazz.getConstructor().newInstance();
 
             // Bean 生命周期第二步:属性赋值
+            // 遍历字段
             for (Field field : clazz.getDeclaredFields()) {
                 // 如果对应的属性具备 Autowired 注解
                 if (field.isAnnotationPresent(Autowired.class)) {
                     // 减少反射不必要的安全检查，提高执行效率
                     field.setAccessible(true);
                     field.set(bean , GetBean(field.getName()));
+                }
+            }
+
+            // 遍历方法
+            for (Method method : clazz.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(PostConstruct.class)) {
+                    method.invoke(bean);
                 }
             }
 
@@ -178,16 +187,7 @@ public class ZyjSpringApplicationContext {
              */
             return bean;
 
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-
-        } catch (NoSuchMethodException e) {
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
 
